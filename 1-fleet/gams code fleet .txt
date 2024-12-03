@@ -1,0 +1,115 @@
+$title Air taxi
+sets
+
+
+i index of flight  /1*48/
+j index of fleet   /S4,S2/
+k index node /vn1*vn12,kr1*kr18,ik1*ik14,th1*th16,ps1*ps12,tj1*tj12,sd1*sd12/
+L(k) sub van index node /vn1*vn12/
+Sf(k) sub krj index node /kr1*kr18/
+B(k) sub ika index node /ik1*ik14/
+Jf(k) sub thr index node /th1*th16/
+O(k) sub psd index node /ps1*ps12/
+A(k) sub tjr index node /tj1*tj12/
+Ia(k) sub sdq index node /sd1*sd12/
+
+
+*analyze hasayat
+iteration /1*25/
+
+;
+parameters
+N(j) number of fleet /S4 6,S2 12/
+c0(j) /S4 178,S2 136/
+
+c(i,j),s(i,k)
+result(iteration,*) results of loop;
+;
+*EXCEL input name.xlsx  par= name parameter  rng=sheet name!first cell in excel rdim=1 cdim=1
+$call GDXXRW fleet.xlsx par=c rng=c3!a1 rdim=1 cdim=1
+$GDXIN fleet.gdx
+$load c
+$GDXIN
+
+$call GDXXRW fleet.xlsx par=s rng=s3!a1 rdim=1  cdim=1
+$GDXIN fleet.gdx
+$load s
+$GDXIN
+display c,s,i,j,k;
+;
+binary variable
+x(i,j)
+;
+integer variable
+G(k,j)
+;
+free variable
+z;
+
+
+equations
+obj
+con1
+con2
+con33
+con3
+con44
+con4
+con55
+con5
+con66
+con6
+con77
+con7
+con88
+con8
+con99
+con9
+
+;
+
+obj              ..  z=e=sum((i,j),C(i,j)*x(i,j))+sum((j),C0(j)*N(j));
+con1 (i)         ..  sum((j),x(i,j)) =e= 1;
+
+con2 (j)         ..  (G("vn12",j)+G("kr18",j)+G("ik14",j)+G("th16",j)+G("ps12",j)+G("tj12",j)+G("sd12",j)) =l= N(j);
+con3  (L,j) $(ord(L)>1 )       ..  sum((i),S(i,L)*x(i,j) ) + G(L-1,j) =e= G(L,j);
+con33  (L,j) $(ord(L)=1 )      ..  sum((i),S(i,L)*x(i,j) ) + G("vn12",j) =e= G(L,j);
+
+con4 (Sf,j) $(ord(Sf)>1 )      ..  sum((i),S(i,Sf)*x(i,j) ) + G(Sf-1,j) =e= G(Sf,j);
+con44 (Sf,j) $(ord(Sf)=1 )     ..  sum((i),S(i,Sf)*x(i,j) ) + G("kr18",j) =e= G(Sf,j);
+
+con5 (B,j) $(ord(B)>1 )       ..  sum((i),S(i,B)*x(i,j) ) + G(B-1,j) =e= G(B,j);
+con55 (B,j) $(ord(B)=1 )      ..  sum((i),S(i,B)*x(i,j) ) + G("ik14",j) =e= G(B,j);
+
+con6 (Jf,j) $(ord(Jf)>1 )      ..  sum((i),S(i,Jf)*x(i,j) ) + G(Jf-1,j) =e= G(Jf,j);
+con66 (Jf,j) $(ord(Jf)=1 )     ..  sum((i),S(i,Jf)*x(i,j) ) + G("th16",j) =e= G(Jf,j);
+
+con7 (O,j) $(ord(O)>1 )       ..  sum((i),S(i,O)*x(i,j) ) + G(O-1,j) =e= G(O,j);
+con77 (O,j) $(ord(O)=1 )      ..  sum((i),S(i,O)*x(i,j) ) + G("ps12",j) =e= G(O,j);
+
+con8 (A,j) $(ord(A)>1 )       ..  sum((i),S(i,A)*x(i,j) ) + G(A-1,j) =e= G(A,j);
+con88 (A,j) $(ord(A)=1 )      ..  sum((i),S(i,A)*x(i,j) ) + G("tj12",j) =e= G(A,j);
+
+con9 (Ia,j) $(ord(Ia)>1 )      ..  sum((i),S(i,Ia)*x(i,j) ) + G(Ia-1,j) =e= G(Ia,j);
+con99 (Ia,j) $(ord(Ia)=1 )     ..  sum((i),S(i,Ia)*x(i,j) ) + G("sd12",j) =e= G(Ia,j);
+
+
+;
+
+model air_taxi /all/;
+option limcol = 1000, limrow = 1000, optca=0, optcr=0;
+option mip = cplex ;
+option reslim=3600;
+*solve air_taxi using  mip min z;
+*display z.l,x.l,G.l;
+
+
+
+Loop(iteration,
+         N('S4')=N('S4')+1;
+         solve air_taxi using MIP minimizing Z;
+         result(iteration,'number of fleet')= N('S4');
+         result(iteration,'Z')=Z.l;
+         );
+
+display Result;

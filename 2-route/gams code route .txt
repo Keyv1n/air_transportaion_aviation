@@ -1,0 +1,72 @@
+option optcr=0.00;
+option optca=0;
+Option Reslim=3600;
+option limrow  =200;
+
+sets
+
+
+j index of flight  /0*6016/
+
+i index of routeS2   /1,2 ,4,7, 8, 9, 12,13, 16, 17,18,22,23,24,25,35,43, 44,46 , 49,50 ,51,54 ,55,58,59 ,60,64,65,66,67, 77,
+                     101, 102, 104, 107, 108,109,112 ,113, 116,117,118,122, 123, 124, 125 ,135 ,143, 144, 146, 149, 150, 151,
+                     154,155,158,159, 160,164 , 165,166 ,167, 177, 201, 202,204 , 207, 208, 209 ,  212 , 213,216,217, 218 , 222 ,
+                     223, 224,225,235, 243, 244, 246, 249, 250,251, 254, 255 ,258, 259, 260,264, 265, 266,  267,277 /
+
+
+iteration /1*42/
+;
+
+scalars
+N number of fleet /15/
+;
+
+parameters
+a(j,i),D(j)
+result(iteration,*) results of loop;
+*EXCEL input name.xlsx  par= name parameter  rng=sheet name!first cell in excel rdim=1 cdim=1
+$call GDXXRW z4.xlsx par=a rng=param!a1 rdim=1 cdim=1
+$GDXIN z4.gdx
+$load a
+$GDXIN
+
+$call GDXXRW z4.xlsx par=D rng=total!a1 rdim=1  cdim=0
+$GDXIN z4.gdx
+$load D
+$GDXIN
+
+;
+binary variable
+x(j)
+;
+free variable
+z1;
+
+
+equations
+obj
+con1
+con2;
+
+obj .. z1=e=sum((j),d(j)*x(j));
+con1 (i)   ..  sum((j),a(j,i)*x(j)) =e= 1;
+con2    ..  sum((j),x(j) ) =l= N;
+;
+
+model cycle /obj,con1,con2/;
+option limcol = 1000, limrow = 1000, optca=0, optcr=0;
+solve cycle using  mip max z1;
+display z1.l,x.l;
+
+$ontext
+
+Loop(iteration,
+         N =N +1;
+         solve cycle using MIP minimizing Z1;
+         result(iteration,"N")= N;
+         result(iteration,'Z1')=Z1.l;
+         );
+
+display Result;
+$offtext
+
