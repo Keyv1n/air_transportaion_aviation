@@ -1,0 +1,56 @@
+option optcr=0.00;
+option optca=0;
+Option Reslim=3600;
+option limrow  =200;
+
+sets
+
+
+j index of flight  /1*201/
+
+i index of crew757 /101,102,103,104,106,107,108,109,112,115,116,117,119,120,121,122,123,124,126,127,128,129,130,132,134,137,139,140,141,142/
+
+;
+scalars
+N number of fleet /4/
+;
+
+parameters
+a(j,i),c(j);
+*EXCEL input name.xlsx  par= name parameter  rng=sheet name!first cell in excel rdim=1 cdim=1
+$call GDXXRW crew737.xlsx par=a rng=param!a1 rdim=1 cdim=1
+$GDXIN crew737.gdx
+$load a
+$GDXIN
+
+$call GDXXRW crew737.xlsx par=c rng=total!a1 rdim=1  cdim=0
+$GDXIN crew737.gdx
+$load c
+$GDXIN
+
+;
+binary variable
+x(j)
+;
+free variable
+z1;
+
+
+equations
+obj
+con1
+con2
+;
+
+obj .. z1=e=sum((j),c(j)*x(j));
+con1 (i)   ..  sum((j),a(j,i)*x(j)) =e= 1;
+con2    ..  sum((j),x(j) ) =l= N;
+;
+
+model cycle /obj,con1,con2/;
+option limcol = 1000, limrow = 1000, optca=0, optcr=0;
+solve cycle using  mip max z1;
+display z1.l,x.l;
+
+
+

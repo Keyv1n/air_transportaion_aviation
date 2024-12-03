@@ -1,0 +1,18 @@
+Total hour cost
+----     53 VARIABLE z1.L                  =       39.000  
+
+----     53 VARIABLE x.L  
+
+1  1.000,    11 1.000,    15 1.000,    24 1.000
+
+
+
+Night JFK cost
+----     53 VARIABLE z1.L                  =       12.000  
+
+----     53 VARIABLE x.L  
+
+1  1.000,    7  1.000,    17 1.000,    18 1.000
+
+
+1  11,    7  13,    17 6,    18 6

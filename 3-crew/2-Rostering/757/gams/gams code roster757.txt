@@ -1,0 +1,58 @@
+option optcr=0.00;
+option optca=0;
+Option Reslim=3600;
+option limrow  =200;
+***************757roster***************
+sets
+
+
+j index of flight  /1*112/
+
+i index of crew757   /1*28/
+
+;
+scalars
+N number of fleet /7/
+;
+
+parameters
+a(j,i),c(j);
+*EXCEL input name.xlsx  par= name parameter  rng=sheet name!first cell in excel rdim=1 cdim=1
+$call GDXXRW roster757.xlsx par=a rng=par!a1 rdim=1 cdim=1
+$GDXIN roster757.gdx
+$load a
+$GDXIN
+
+$call GDXXRW roster757.xlsx par=c rng=total!a1 rdim=1  cdim=0
+$GDXIN roster757.gdx
+$load c
+$GDXIN
+
+;
+display   a,c;
+binary variable
+x(j)
+;
+free variable
+z1;
+
+
+equations
+obj
+con1
+*con2
+;
+
+obj .. z1=e=sum((j),abs(20-c(j))*x(j));
+con1 (i)   ..  sum((j),a(j,i)*x(j)) =e=1;
+*con2    ..  sum((j),x(j) ) =l= N;
+;
+
+model cycle /obj,con1/;
+option limcol = 1000, limrow = 1000, optca=0, optcr=0;
+option minlp=baron;
+solve cycle using  minlp min z1;
+display z1.l,x.l;
+
+
+
